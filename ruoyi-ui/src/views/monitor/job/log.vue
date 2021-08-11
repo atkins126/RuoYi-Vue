@@ -89,9 +89,19 @@
           plain
           icon="el-icon-download"
           size="mini"
+          :loading="exportLoading"
           @click="handleExport"
           v-hasPermi="['monitor:job:export']"
         >导出</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="warning"
+          plain
+          icon="el-icon-close"
+          size="mini"
+          @click="handleClose"
+        >关闭</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
@@ -167,6 +177,7 @@
 </template>
 
 <script>
+import { getJob} from "@/api/monitor/job";
 import { listJobLog, delJobLog, exportJobLog, cleanJobLog } from "@/api/monitor/jobLog";
 
 export default {
@@ -175,6 +186,8 @@ export default {
     return {
       // 遮罩层
       loading: true,
+      // 导出遮罩层
+      exportLoading: false,
       // 选中数组
       ids: [],
       // 非多个禁用
@@ -206,8 +219,17 @@ export default {
     };
   },
   created() {
-    this.getList();
-    this.getDicts("sys_job_status").then(response => {
+    const jobId = this.$route.query.jobId;
+    if (jobId !== undefined && jobId != 0) {
+      getJob(jobId).then(response => {
+        this.queryParams.jobName = response.data.jobName;
+        this.queryParams.jobGroup = response.data.jobGroup;
+        this.getList();
+      });
+    } else {
+      this.getList();
+    }
+    this.getDicts("sys_common_status").then(response => {
       this.statusOptions = response.data;
     });
     this.getDicts("sys_job_group").then(response => {
@@ -232,6 +254,11 @@ export default {
     // 任务组名字典翻译
     jobGroupFormat(row, column) {
       return this.selectDictLabel(this.jobGroupOptions, row.jobGroup);
+    },
+    // 返回按钮
+    handleClose() {
+      this.$store.dispatch("tagsView/delView", this.$route);
+      this.$router.push({ path: "/monitor/job" });
     },
     /** 搜索按钮操作 */
     handleQuery() {
@@ -266,7 +293,7 @@ export default {
         }).then(() => {
           this.getList();
           this.msgSuccess("删除成功");
-        })
+        }).catch(() => {});
     },
     /** 清空按钮操作 */
     handleClean() {
@@ -279,7 +306,7 @@ export default {
         }).then(() => {
           this.getList();
           this.msgSuccess("清空成功");
-        })
+        }).catch(() => {});
     },
     /** 导出按钮操作 */
     handleExport() {
@@ -288,11 +315,13 @@ export default {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
           type: "warning"
-        }).then(function() {
+        }).then(() => {
+          this.exportLoading = true;
           return exportJobLog(queryParams);
         }).then(response => {
           this.download(response.msg);
-        })
+          this.exportLoading = false;
+        }).catch(() => {});
     }
   }
 };
