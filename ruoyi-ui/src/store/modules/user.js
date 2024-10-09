@@ -4,6 +4,7 @@ import { getToken, setToken, removeToken } from '@/utils/auth'
 const user = {
   state: {
     token: getToken(),
+    id: '',
     name: '',
     avatar: '',
     roles: [],
@@ -13,6 +14,9 @@ const user = {
   mutations: {
     SET_TOKEN: (state, token) => {
       state.token = token
+    },
+    SET_ID: (state, id) => {
+      state.id = id
     },
     SET_NAME: (state, name) => {
       state.name = name
@@ -51,13 +55,14 @@ const user = {
       return new Promise((resolve, reject) => {
         getInfo().then(res => {
           const user = res.user
-          const avatar = user.avatar == "" ? require("@/assets/images/profile.jpg") : process.env.VUE_APP_BASE_API + user.avatar;
+          const avatar = (user.avatar == "" || user.avatar == null) ? require("@/assets/images/profile.jpg") : process.env.VUE_APP_BASE_API + user.avatar;
           if (res.roles && res.roles.length > 0) { // 验证返回的roles是否是一个非空数组
             commit('SET_ROLES', res.roles)
             commit('SET_PERMISSIONS', res.permissions)
           } else {
             commit('SET_ROLES', ['ROLE_DEFAULT'])
           }
+          commit('SET_ID', user.userId)
           commit('SET_NAME', user.userName)
           commit('SET_AVATAR', avatar)
           resolve(res)
@@ -66,7 +71,7 @@ const user = {
         })
       })
     },
-    
+
     // 退出系统
     LogOut({ commit, state }) {
       return new Promise((resolve, reject) => {

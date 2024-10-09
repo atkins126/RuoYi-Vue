@@ -29,7 +29,7 @@
           <svg-icon slot="prefix" icon-class="password" class="el-input__icon input-icon" />
         </el-input>
       </el-form-item>
-      <el-form-item prop="code" v-if="captchaOnOff">
+      <el-form-item prop="code" v-if="captchaEnabled">
         <el-input
           v-model="registerForm.code"
           auto-complete="off"
@@ -61,7 +61,7 @@
     </el-form>
     <!--  底部  -->
     <div class="el-register-footer">
-      <span>Copyright © 2018-2021 ruoyi.vip All Rights Reserved.</span>
+      <span>Copyright © 2018-2024 ruoyi.vip All Rights Reserved.</span>
     </div>
   </div>
 </template>
@@ -95,7 +95,8 @@ export default {
         ],
         password: [
           { required: true, trigger: "blur", message: "请输入您的密码" },
-          { min: 5, max: 20, message: '用户密码长度必须介于 5 和 20 之间', trigger: 'blur' }
+          { min: 5, max: 20, message: "用户密码长度必须介于 5 和 20 之间", trigger: "blur" },
+          { pattern: /^[^<>"'|\\]+$/, message: "不能包含非法字符：< > \" ' \\\ |", trigger: "blur" }
         ],
         confirmPassword: [
           { required: true, trigger: "blur", message: "请再次输入您的密码" },
@@ -104,7 +105,7 @@ export default {
         code: [{ required: true, trigger: "change", message: "请输入验证码" }]
       },
       loading: false,
-      captchaOnOff: true
+      captchaEnabled: true
     };
   },
   created() {
@@ -113,8 +114,8 @@ export default {
   methods: {
     getCode() {
       getCodeImg().then(res => {
-        this.captchaOnOff = res.captchaOnOff === undefined ? true : res.captchaOnOff;
-        if (this.captchaOnOff) {
+        this.captchaEnabled = res.captchaEnabled === undefined ? true : res.captchaEnabled;
+        if (this.captchaEnabled) {
           this.codeUrl = "data:image/gif;base64," + res.img;
           this.registerForm.uuid = res.uuid;
         }
@@ -127,13 +128,14 @@ export default {
           register(this.registerForm).then(res => {
             const username = this.registerForm.username;
             this.$alert("<font color='red'>恭喜你，您的账号 " + username + " 注册成功！</font>", '系统提示', {
-              dangerouslyUseHTMLString: true
+              dangerouslyUseHTMLString: true,
+              type: 'success'
             }).then(() => {
               this.$router.push("/login");
             }).catch(() => {});
           }).catch(() => {
             this.loading = false;
-            if (this.captchaOnOff) {
+            if (this.captchaEnabled) {
               this.getCode();
             }
           })

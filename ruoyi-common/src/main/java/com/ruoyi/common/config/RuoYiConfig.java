@@ -21,14 +21,14 @@ public class RuoYiConfig
     /** 版权年份 */
     private String copyrightYear;
 
-    /** 实例演示开关 */
-    private boolean demoEnabled;
-
     /** 上传路径 */
     private static String profile;
 
     /** 获取地址开关 */
     private static boolean addressEnabled;
+
+    /** 验证码类型 */
+    private static String captchaType;
 
     public String getName()
     {
@@ -60,16 +60,6 @@ public class RuoYiConfig
         this.copyrightYear = copyrightYear;
     }
 
-    public boolean isDemoEnabled()
-    {
-        return demoEnabled;
-    }
-
-    public void setDemoEnabled(boolean demoEnabled)
-    {
-        this.demoEnabled = demoEnabled;
-    }
-
     public static String getProfile()
     {
         return profile;
@@ -88,6 +78,14 @@ public class RuoYiConfig
     public void setAddressEnabled(boolean addressEnabled)
     {
         RuoYiConfig.addressEnabled = addressEnabled;
+    }
+
+    public static String getCaptchaType() {
+        return captchaType;
+    }
+
+    public void setCaptchaType(String captchaType) {
+        RuoYiConfig.captchaType = captchaType;
     }
 
     /**

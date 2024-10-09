@@ -2,6 +2,7 @@ package com.ruoyi.web.controller.system;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -50,12 +51,12 @@ public class SysDictDataController extends BaseController
 
     @Log(title = "字典数据", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('system:dict:export')")
-    @GetMapping("/export")
-    public AjaxResult export(SysDictData dictData)
+    @PostMapping("/export")
+    public void export(HttpServletResponse response, SysDictData dictData)
     {
         List<SysDictData> list = dictDataService.selectDictDataList(dictData);
         ExcelUtil<SysDictData> util = new ExcelUtil<SysDictData>(SysDictData.class);
-        return util.exportExcel(list, "字典数据");
+        util.exportExcel(response, list, "字典数据");
     }
 
     /**
@@ -65,7 +66,7 @@ public class SysDictDataController extends BaseController
     @GetMapping(value = "/{dictCode}")
     public AjaxResult getInfo(@PathVariable Long dictCode)
     {
-        return AjaxResult.success(dictDataService.selectDictDataById(dictCode));
+        return success(dictDataService.selectDictDataById(dictCode));
     }
 
     /**
@@ -79,7 +80,7 @@ public class SysDictDataController extends BaseController
         {
             data = new ArrayList<SysDictData>();
         }
-        return AjaxResult.success(data);
+        return success(data);
     }
 
     /**

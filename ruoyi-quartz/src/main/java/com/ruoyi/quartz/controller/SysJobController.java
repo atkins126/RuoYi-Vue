@@ -1,6 +1,7 @@
 package com.ruoyi.quartz.controller;
 
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,6 +25,7 @@ import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.quartz.domain.SysJob;
 import com.ruoyi.quartz.service.ISysJobService;
 import com.ruoyi.quartz.util.CronUtils;
+import com.ruoyi.quartz.util.ScheduleUtils;
 
 /**
  * 调度任务信息操作处理
@@ -54,12 +56,12 @@ public class SysJobController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('monitor:job:export')")
     @Log(title = "定时任务", businessType = BusinessType.EXPORT)
-    @GetMapping("/export")
-    public AjaxResult export(SysJob sysJob)
+    @PostMapping("/export")
+    public void export(HttpServletResponse response, SysJob sysJob)
     {
         List<SysJob> list = jobService.selectJobList(sysJob);
         ExcelUtil<SysJob> util = new ExcelUtil<SysJob>(SysJob.class);
-        return util.exportExcel(list, "定时任务");
+        util.exportExcel(response, list, "定时任务");
     }
 
     /**
@@ -69,7 +71,7 @@ public class SysJobController extends BaseController
     @GetMapping(value = "/{jobId}")
     public AjaxResult getInfo(@PathVariable("jobId") Long jobId)
     {
-        return AjaxResult.success(jobService.selectJobById(jobId));
+        return success(jobService.selectJobById(jobId));
     }
 
     /**
@@ -86,11 +88,23 @@ public class SysJobController extends BaseController
         }
         else if (StringUtils.containsIgnoreCase(job.getInvokeTarget(), Constants.LOOKUP_RMI))
         {
-            return error("新增任务'" + job.getJobName() + "'失败，目标字符串不允许'rmi://'调用");
+            return error("新增任务'" + job.getJobName() + "'失败，目标字符串不允许'rmi'调用");
+        }
+        else if (StringUtils.containsAnyIgnoreCase(job.getInvokeTarget(), new String[] { Constants.LOOKUP_LDAP, Constants.LOOKUP_LDAPS }))
+        {
+            return error("新增任务'" + job.getJobName() + "'失败，目标字符串不允许'ldap(s)'调用");
         }
         else if (StringUtils.containsAnyIgnoreCase(job.getInvokeTarget(), new String[] { Constants.HTTP, Constants.HTTPS }))
         {
-            return error("新增任务'" + job.getJobName() + "'失败，目标字符串不允许'http(s)//'调用");
+            return error("新增任务'" + job.getJobName() + "'失败，目标字符串不允许'http(s)'调用");
+        }
+        else if (StringUtils.containsAnyIgnoreCase(job.getInvokeTarget(), Constants.JOB_ERROR_STR))
+        {
+            return error("新增任务'" + job.getJobName() + "'失败，目标字符串存在违规");
+        }
+        else if (!ScheduleUtils.whiteList(job.getInvokeTarget()))
+        {
+            return error("新增任务'" + job.getJobName() + "'失败，目标字符串不在白名单内");
         }
         job.setCreateBy(getUsername());
         return toAjax(jobService.insertJob(job));
@@ -110,11 +124,23 @@ public class SysJobController extends BaseController
         }
         else if (StringUtils.containsIgnoreCase(job.getInvokeTarget(), Constants.LOOKUP_RMI))
         {
-            return error("修改任务'" + job.getJobName() + "'失败，目标字符串不允许'rmi://'调用");
+            return error("修改任务'" + job.getJobName() + "'失败，目标字符串不允许'rmi'调用");
+        }
+        else if (StringUtils.containsAnyIgnoreCase(job.getInvokeTarget(), new String[] { Constants.LOOKUP_LDAP, Constants.LOOKUP_LDAPS }))
+        {
+            return error("修改任务'" + job.getJobName() + "'失败，目标字符串不允许'ldap(s)'调用");
         }
         else if (StringUtils.containsAnyIgnoreCase(job.getInvokeTarget(), new String[] { Constants.HTTP, Constants.HTTPS }))
         {
-            return error("修改任务'" + job.getJobName() + "'失败，目标字符串不允许'http(s)//'调用");
+            return error("修改任务'" + job.getJobName() + "'失败，目标字符串不允许'http(s)'调用");
+        }
+        else if (StringUtils.containsAnyIgnoreCase(job.getInvokeTarget(), Constants.JOB_ERROR_STR))
+        {
+            return error("修改任务'" + job.getJobName() + "'失败，目标字符串存在违规");
+        }
+        else if (!ScheduleUtils.whiteList(job.getInvokeTarget()))
+        {
+            return error("修改任务'" + job.getJobName() + "'失败，目标字符串不在白名单内");
         }
         job.setUpdateBy(getUsername());
         return toAjax(jobService.updateJob(job));
@@ -141,8 +167,8 @@ public class SysJobController extends BaseController
     @PutMapping("/run")
     public AjaxResult run(@RequestBody SysJob job) throws SchedulerException
     {
-        jobService.run(job);
-        return AjaxResult.success();
+        boolean result = jobService.run(job);
+        return result ? success() : error("任务不存在或已过期！");
     }
 
     /**
@@ -154,6 +180,6 @@ public class SysJobController extends BaseController
     public AjaxResult remove(@PathVariable Long[] jobIds) throws SchedulerException, TaskException
     {
         jobService.deleteJobByIds(jobIds);
-        return AjaxResult.success();
+        return success();
     }
 }

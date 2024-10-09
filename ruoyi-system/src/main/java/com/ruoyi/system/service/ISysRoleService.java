@@ -49,7 +49,7 @@ public interface ISysRoleService
      * @param userId 用户ID
      * @return 选中角色ID列表
      */
-    public List<Integer> selectRoleListByUserId(Long userId);
+    public List<Long> selectRoleListByUserId(Long userId);
 
     /**
      * 通过角色ID查询角色
@@ -65,7 +65,7 @@ public interface ISysRoleService
      * @param role 角色信息
      * @return 结果
      */
-    public String checkRoleNameUnique(SysRole role);
+    public boolean checkRoleNameUnique(SysRole role);
 
     /**
      * 校验角色权限是否唯一
@@ -73,7 +73,7 @@ public interface ISysRoleService
      * @param role 角色信息
      * @return 结果
      */
-    public String checkRoleKeyUnique(SysRole role);
+    public boolean checkRoleKeyUnique(SysRole role);
 
     /**
      * 校验角色是否允许操作
@@ -81,6 +81,13 @@ public interface ISysRoleService
      * @param role 角色信息
      */
     public void checkRoleAllowed(SysRole role);
+
+    /**
+     * 校验角色是否有数据权限
+     * 
+     * @param roleIds 角色id
+     */
+    public void checkRoleDataScope(Long... roleIds);
 
     /**
      * 通过角色ID查询角色使用数量

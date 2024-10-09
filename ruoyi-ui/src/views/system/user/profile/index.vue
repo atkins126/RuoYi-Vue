@@ -8,7 +8,7 @@
           </div>
           <div>
             <div class="text-center">
-              <userAvatar :user="user" />
+              <userAvatar />
             </div>
             <ul class="list-group list-group-striped">
               <li class="list-group-item">
@@ -49,7 +49,7 @@
               <userInfo :user="user" />
             </el-tab-pane>
             <el-tab-pane label="修改密码" name="resetPwd">
-              <resetPwd :user="user" />
+              <resetPwd />
             </el-tab-pane>
           </el-tabs>
         </el-card>

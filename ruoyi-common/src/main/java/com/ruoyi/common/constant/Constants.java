@@ -1,5 +1,6 @@
 package com.ruoyi.common.constant;
 
+import java.util.Locale;
 import io.jsonwebtoken.Claims;
 
 /**
@@ -18,6 +19,16 @@ public class Constants
      * GBK 字符集
      */
     public static final String GBK = "GBK";
+
+    /**
+     * 系统语言
+     */
+    public static final Locale DEFAULT_LOCALE = Locale.SIMPLIFIED_CHINESE;
+
+    /**
+     * www主域
+     */
+    public static final String WWW = "www.";
 
     /**
      * http请求
@@ -60,19 +71,24 @@ public class Constants
     public static final String LOGIN_FAIL = "Error";
 
     /**
-     * 验证码 redis key
+     * 所有权限标识
      */
-    public static final String CAPTCHA_CODE_KEY = "captcha_codes:";
+    public static final String ALL_PERMISSION = "*:*:*";
 
     /**
-     * 登录用户 redis key
+     * 管理员角色权限标识
      */
-    public static final String LOGIN_TOKEN_KEY = "login_tokens:";
-    
+    public static final String SUPER_ADMIN = "admin";
+
     /**
-     * 防重提交 redis key
+     * 角色权限分隔符
      */
-    public static final String REPEAT_SUBMIT_KEY = "repeat_submit:";
+    public static final String ROLE_DELIMETER = ",";
+
+    /**
+     * 权限标识分隔符
+     */
+    public static final String PERMISSION_DELIMETER = ",";
 
     /**
      * 验证码有效期（分钟）
@@ -120,16 +136,6 @@ public class Constants
     public static final String JWT_AUTHORITIES = "authorities";
 
     /**
-     * 参数管理 cache key
-     */
-    public static final String SYS_CONFIG_KEY = "sys_config:";
-
-    /**
-     * 字典管理 cache key
-     */
-    public static final String SYS_DICT_KEY = "sys_dict:";
-
-    /**
      * 资源映射路径 前缀
      */
     public static final String RESOURCE_PREFIX = "/profile";
@@ -137,5 +143,31 @@ public class Constants
     /**
      * RMI 远程方法调用
      */
-    public static final String LOOKUP_RMI = "rmi://";
+    public static final String LOOKUP_RMI = "rmi:";
+
+    /**
+     * LDAP 远程方法调用
+     */
+    public static final String LOOKUP_LDAP = "ldap:";
+
+    /**
+     * LDAPS 远程方法调用
+     */
+    public static final String LOOKUP_LDAPS = "ldaps:";
+
+    /**
+     * 自动识别json对象白名单配置（仅允许解析的包名，范围越小越安全）
+     */
+    public static final String[] JSON_WHITELIST_STR = { "org.springframework", "com.ruoyi" };
+
+    /**
+     * 定时任务白名单配置（仅允许访问的包名，如其他需要可以自行添加）
+     */
+    public static final String[] JOB_WHITELIST_STR = { "com.ruoyi.quartz.task" };
+
+    /**
+     * 定时任务违规的字符
+     */
+    public static final String[] JOB_ERROR_STR = { "java.net.URL", "javax.naming.InitialContext", "org.yaml.snakeyaml",
+            "org.springframework", "org.apache", "com.ruoyi.common.utils.file", "com.ruoyi.common.config", "com.ruoyi.generator" };
 }

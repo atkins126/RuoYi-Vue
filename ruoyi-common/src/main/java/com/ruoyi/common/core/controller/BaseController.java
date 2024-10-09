@@ -16,6 +16,7 @@ import com.ruoyi.common.core.page.PageDomain;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.page.TableSupport;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.PageUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.sql.SqlUtil;
@@ -51,14 +52,7 @@ public class BaseController
      */
     protected void startPage()
     {
-        PageDomain pageDomain = TableSupport.buildPageRequest();
-        Integer pageNum = pageDomain.getPageNum();
-        Integer pageSize = pageDomain.getPageSize();
-        if (StringUtils.isNotNull(pageNum) && StringUtils.isNotNull(pageSize))
-        {
-            String orderBy = SqlUtil.escapeOrderBySql(pageDomain.getOrderBy());
-            PageHelper.startPage(pageNum, pageSize, orderBy);
-        }
+        PageUtils.startPage();
     }
 
     /**
@@ -72,6 +66,14 @@ public class BaseController
             String orderBy = SqlUtil.escapeOrderBySql(pageDomain.getOrderBy());
             PageHelper.orderBy(orderBy);
         }
+    }
+
+    /**
+     * 清理分页的线程变量
+     */
+    protected void clearPage()
+    {
+        PageUtils.clearPage();
     }
 
     /**
@@ -111,6 +113,14 @@ public class BaseController
     {
         return AjaxResult.success(message);
     }
+    
+    /**
+     * 返回成功消息
+     */
+    public AjaxResult success(Object data)
+    {
+        return AjaxResult.success(data);
+    }
 
     /**
      * 返回失败消息
@@ -118,6 +128,14 @@ public class BaseController
     public AjaxResult error(String message)
     {
         return AjaxResult.error(message);
+    }
+
+    /**
+     * 返回警告消息
+     */
+    public AjaxResult warn(String message)
+    {
+        return AjaxResult.warn(message);
     }
 
     /**
